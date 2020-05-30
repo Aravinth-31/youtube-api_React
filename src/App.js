@@ -9,7 +9,6 @@ class  App extends React.Component {
 
       function startSearch(event){
         
-        alert("Submitted");
         event.preventDefault();    
         var search=$("#search").val();
         var orderBy=$("select").val() || "Relevance";    
