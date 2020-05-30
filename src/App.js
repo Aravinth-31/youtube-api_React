@@ -37,7 +37,7 @@ class  App extends React.Component {
     
             data.items.forEach(item=>{
               video = ` 
-              <iframe src="http://www.youtube.com/embed/${item.id.videoId}" frameborder="0" allowfullscreen></iframe>
+              <iframe src="https://www.youtube.com/embed/${item.id.videoId}" frameborder="0" allowfullscreen></iframe>
               `
     
               $("#videos").append(video)
