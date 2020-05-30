@@ -7,6 +7,8 @@ class  App extends React.Component {
       var API_KEY="AIzaSyDiTJ-eKfGFJZUmKvyjkg1JfKuh_wCbJGo";
       var video="";
 
+      videoSearch(API_KEY,"Tech Trends",15,"relevance");
+      
       function startSearch(event){
         
         event.preventDefault();    
