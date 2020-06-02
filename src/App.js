@@ -2,50 +2,61 @@ import React from 'react';
 import $ from 'jquery';
 
 class  App extends React.Component {
-  componentDidMount(){
-      
-      var API_KEY="AIzaSyDiTJ-eKfGFJZUmKvyjkg1JfKuh_wCbJGo";
-      var video="";
+  constructor(props){
+    super(props);
+    this.API_KEY="AIzaSyDiTJ-eKfGFJZUmKvyjkg1JfKuh_wCbJGo";
+    this.search='Tech Trends';
+    this.max=15;
+    this.order="relevance";
+    this.count=15;
+  }
 
-      videoSearch(API_KEY,"Tech Trends",15,"relevance");
-      
-      function startSearch(event){
-        
-        event.preventDefault();    
-        var search=$("#search").val();
-        var orderBy=$("select").val() || "Relevance";    
-        var max=$("#maxresult-input").val()||15;    
-        videoSearch(API_KEY,search,max,orderBy);
+  startSearch = (event)=>{
+    $("#videos").empty();    
+    event.preventDefault();    
+    this.search=$("#search").val();
+    this.order=$("select").val() || "Relevance";    
+    this.max=$("#maxresult-input").val()||15;    
+    this.count=this.max;
+    this.videoSearch(this.API_KEY,this.search,this.max,this.order,this.count);
+  }
 
-      }
+  videoSearch=(key,search,max,orderBy,count)=>{
+    
+      $.get("https://www.googleapis.com/youtube/v3/search?key="+key+"&type=video&part=snippet&maxResults="+max+"&q="+search+"&order="+orderBy,function(data){
+        console.log(data);
+        let videos=data.items;
+        let n=videos.length;
+        for(var i=max-count;i<max;i++){
+          let item=videos[i%n];
+          let video = ` 
+          <iframe src="https://www.youtube.com/embed/${item.id.videoId}" frameborder="0" allowfullscreen></iframe>
+          `
 
-      $("select").mouseup(function(event) {
-        var open = $(this).data("isopen");
-        if(open) {
-        startSearch(event);
+          $("#videos").append(video)
         }
-        $(this).data("isopen", !open);
-    });
+      });
+  }
+  componentDidMount(){
 
-      $("#form-submit").click(function(event){
-        startSearch(event);
-      })
+      window.addEventListener('scroll', this.handleOnScroll);
+      this.videoSearch(this.API_KEY,this.search,this.max,this.order,this.count);
   
-      function videoSearch(key,search,max,orderBy){
-    
-        $("#videos").empty();    
-          $.get("https://www.googleapis.com/youtube/v3/search?key="+key+"&type=video&part=snippet&maxResults="+max+"&q="+search+"&order="+orderBy,function(data){
-            console.log(data);
-    
-            data.items.forEach(item=>{
-              video = ` 
-              <iframe src="https://www.youtube.com/embed/${item.id.videoId}" frameborder="0" allowfullscreen></iframe>
-              `
-    
-              $("#videos").append(video)
-            });
-          });
-      }
+  }
+
+  componentWillUnmount(){
+    window.removeEventListener('scroll', this.handleOnScroll);
+  }
+  handleOnScroll =  () => {
+    var scrollTop = (document.documentElement && document.documentElement.scrollTop) || document.body.scrollTop;
+    var scrollHeight = (document.documentElement && document.documentElement.scrollHeight) || document.body.scrollHeight;
+    var clientHeight = document.documentElement.clientHeight || window.innerHeight;
+    var scrolledToBottom = Math.ceil(scrollTop + clientHeight) >= scrollHeight;
+
+    if (scrolledToBottom) {      
+      this.max=this.max+this.count;
+      this.videoSearch(this.API_KEY,this.search,this.max,this.order,this.count);
+    }
   }
 
   render(){
@@ -58,10 +69,10 @@ class  App extends React.Component {
             <input className="form-control" type="text" id="search"></input>
           </div>
           <div className="form-group" style={{margin: "10px"}}>
-            <input type="submit" id="form-submit" className="btn btn-danger" value="search"/>
+            <input type="submit" id="form-submit" className="btn btn-danger" value="search" onClick={this.startSearch}/>
           </div>
           <div className="form-group" style={{margin: "10px"}} >
-            <input type="number" id="maxresult-input" placeholder="Max Results" min="1" max="50"/>
+            <input type="number" id="maxresult-input" placeholder="Max Results" min="10" max="50"/>
           </div>
           <div style={{margin: "10px"}} className="form-group">
             <select id="order-input" defaultValue={{ label: "Relevance", value: "Relevance" }} >
